@@ -29,4 +29,14 @@ public class Job {
     public double getSalary() {
         return salary;
     }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "title='" + title + '\'' +
+                ", skills='" + skills + '\'' +
+                ", location='" + location + '\'' +
+                ", salary=" + salary +
+                '}';
+    }
 }
