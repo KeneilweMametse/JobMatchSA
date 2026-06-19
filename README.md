@@ -161,7 +161,7 @@ User Dashboard & Recommendations
 
 - [x] Project planning
 - [x] Repository creation
-- [ ] Data model design
+- [ ] Data za.co.jobmatchsa.model design
 - [ ] User account & profile module
 - [ ] Data ingestion module
 - [ ] Data cleaning module
