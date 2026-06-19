@@ -1,14 +1,12 @@
-package za.co.jobmatchsa.config;
-
-import java.sql.Connection;
+package za.co.jobmatch.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
-
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * za.co.jobmatchsa.config.DatabaseConnection handles the single shared connection to PostgreSQL.
+ * DatabaseConnection handles the single shared connection to PostgreSQL.
  * It reads credentials from the .env file so passwords are never hardcoded.
  */
 public class DatabaseConnection {
@@ -36,5 +34,17 @@ public class DatabaseConnection {
             }
         }
         return connection;
+    }
+
+    public static void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                connection = null;
+                System.out.println("Database connection closed.");
+            } catch (SQLException e) {
+                System.err.println("Failed to close connection: " + e.getMessage());
+            }
+        }
     }
 }
