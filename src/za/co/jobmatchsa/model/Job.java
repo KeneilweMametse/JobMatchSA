@@ -13,30 +13,4 @@ public class Job {
         this.location = location;
         this.salary = salary;
     }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getSkills() {
-        return skills;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public double getSalary() {
-        return salary;
-    }
-
-    @Override
-    public String toString() {
-        return "Job{" +
-                "title='" + title + '\'' +
-                ", skills='" + skills + '\'' +
-                ", location='" + location + '\'' +
-                ", salary=" + salary +
-                '}';
-    }
 }
