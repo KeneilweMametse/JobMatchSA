@@ -1,4 +1,4 @@
 package za.co.jobmatchsa.model;
 
-public class Candidate {
+public class Application  {
 }
