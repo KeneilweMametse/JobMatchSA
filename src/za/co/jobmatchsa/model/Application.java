@@ -76,4 +76,11 @@ public class Application {
     public void setAppliedAt(LocalDateTime appliedAt) {
         this.appliedAt = appliedAt;
     }
+
+    @Override
+    public String toString() {
+        return "Application{id=" + id + ", userId=" + userId +
+                ", jobId=" + jobId + ", status='" + status + "'}";
+    }
+
 }
