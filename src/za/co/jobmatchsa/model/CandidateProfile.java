@@ -42,7 +42,14 @@ public class CandidateProfile {
         this.phoneNumber     = phoneNumber;
     }
 
-
+    @Override
+    public String toString() {
+        return "CandidateProfile{userId=" + userId +
+                ", location='" + location + "'" +
+                ", skills='" + skills + "'" +
+                ", autoApply=" + autoApply + "}";
+    }
+}
 
 
 
