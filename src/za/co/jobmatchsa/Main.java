@@ -1,29 +1,77 @@
-import za.co.jobmatchsa.config.DatabaseConnection;
+package za.co.jobmatchsa;
 
-import java.sql.Connection;
+import za.co.jobmatchsa.config.DatabaseConnection;
+import za.co.jobmatchsa.model.User;
+import za.co.jobmatchsa.service.AuthService;
+
+import java.util.Scanner;
 
 /**
  * Main entry point for Job Match SA.
- * Phase 1: confirms the database connection is w orking.
+ * Phase 2: console-based user registration and login.
  */
 public class Main {
 
     public static void main(String[] args) {
 
+        Scanner scanner = new Scanner(System.in);
+        AuthService authService = new AuthService();
+
         System.out.println("=================================");
-        System.out.println("   Job Match SA — Starting up   ");
+        System.out.println("       Job Match SA");
         System.out.println("=================================");
 
-        // Test the database connection
-        Connection connection = DatabaseConnection.getConnection();
+        boolean running = true;
 
-        if (connection != null) {
-            System.out.println("Phase 1 complete: database is connected and ready.");
-        } else {
-            System.out.println("Could not connect to the database. Check your .env file.");
+        while (running) {
+            System.out.println("\n1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+
+                case "1" -> {
+                    System.out.print("Full name: ");
+                    String fullName = scanner.nextLine();
+
+                    System.out.print("Email: ");
+                    String email = scanner.nextLine();
+
+                    System.out.print("Password (min 6 characters): ");
+                    String password = scanner.nextLine();
+
+                    String result = authService.register(fullName, email, password);
+                    System.out.println(result);
+                }
+
+                case "2" -> {
+                    System.out.print("Email: ");
+                    String email = scanner.nextLine();
+
+                    System.out.print("Password: ");
+                    String password = scanner.nextLine();
+
+                    User loggedInUser = authService.login(email, password);
+
+                    if (loggedInUser != null) {
+                        System.out.println("You are now logged in as " + loggedInUser.getFullName());
+                        // Phase 3 onwards: this is where we'd go to the profile/dashboard
+                    }
+                }
+
+                case "3" -> {
+                    running = false;
+                    System.out.println("Goodbye!");
+                }
+
+                default -> System.out.println("Invalid option, please choose 1, 2 or 3.");
+            }
         }
 
-        // Close connection cleanly on exit
         DatabaseConnection.closeConnection();
+        scanner.close();
     }
 }
