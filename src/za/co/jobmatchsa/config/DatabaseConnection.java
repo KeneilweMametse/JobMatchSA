@@ -1,4 +1,4 @@
-package za.co.jobmatch.config;
+package za.co.jobmatchsa.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;
