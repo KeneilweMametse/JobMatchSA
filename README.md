@@ -5,7 +5,7 @@
 
 ## Demo Video
 
-📺 [Add unlisted YouTube link here before submitting]
+📺 
 
 ## Overview
 
