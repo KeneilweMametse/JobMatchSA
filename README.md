@@ -1,199 +1,114 @@
 # Job Match SA
 
-> Centralizing South Africa's job market data to connect talent with opportunity.
+> A Java desktop app that matches candidates to jobs based on skills, and
+> generates a tailored CV — built as a Data Engineering elective project.
+
+## Demo Video
+
+📺 [Add unlisted YouTube link here before submitting]
 
 ## Overview
 
-**Job Match SA** is a data engineering project that collects, processes, and analyzes job listings from multiple South African and global job sources to help job seekers find opportunities that match their skills and experience.
+**Job Match SA** is a JavaFX desktop application that lets a candidate create
+a profile, matches that profile against job listings stored in a Postgres
+database using a skills-based scoring algorithm, and generates a base CV as
+a PDF from the profile data.
 
-The platform handles the full pipeline — ingestion, cleaning, transformation, and storage — before matching candidates to jobs, generating ATS-optimized CVs, applying on their behalf, and notifying them through their preferred channel.
+The long-term vision (see [Roadmap](#roadmap) below) is a full pipeline that
+ingests listings from multiple job boards, cleans and standardizes them, and
+layers on auto-apply and notifications. What's built so far is the core
+account/profile/matching/CV loop — the foundation the rest is designed to sit on.
 
 ## Problem Statement
 
-Job seekers often spend hours searching across multiple platforms for relevant opportunities, leading to missed listings and wasted time. Many also struggle with CVs that are rejected by Applicant Tracking Systems before a human ever reads them. Job Match SA solves both problems by centralizing job data, generating ATS-passing CVs, automating applications, and identifying skill gaps that affect employability.
+Job seekers spend hours searching across multiple platforms for relevant
+opportunities and often can't tell, at a glance, which skills are actually
+missing from their profile for the roles they want. Job Match SA addresses
+the second half of that: given a candidate's profile and a set of job
+listings, it scores each match and shows exactly which required skills are
+present vs. missing, then produces a CV from that same profile data.
 
-## Objectives
+## What's Built
 
-- Collect job data from multiple South African and global sources
-- Clean and standardize job information across platforms
-- Store processed data in a structured database
-- Match candidate profiles with relevant job requirements
-- Generate ATS-optimized CVs from user profiles or uploaded documents
-- Tailor CVs per job application to match job-specific keywords
-- Apply to jobs automatically on the candidate's behalf
-- Notify candidates via email, SMS, or job links — their choice
-- Generate actionable job market insights
-- Identify skill gaps for career development
+| Area | What it does |
+|---|---|
+| **Accounts** | Registration and login, passwords hashed with BCrypt (`AuthService`, `UserDAO`) |
+| **Candidate profiles** | Location, years of experience, education, skills, and notification preferences, with validation (e.g. phone number required if SMS is selected) (`ProfileService`, `CandidateProfileDAO`) |
+| **Skill matching** | Compares a candidate's skills against each job's required skills, returns a match score (`matched / required * 100`), plus matched and missing skill lists, sorted by best match (`MatchingService`) |
+| **CV generation** | Builds a base CV as a PDF from the candidate's profile using iText (`CvGeneratorService`) |
+| **Desktop UI** | JavaFX screens for login, registration, and profile setup (`JobMatchApp`, `ProfileFormController`) |
 
-## Features
+## Roadmap
 
-### User Accounts & Profiles
+These are the pieces described in the original project vision that aren't
+built yet. Listed honestly so scope is clear:
 
-| Feature | Description | Status |
-|---|---|---|
-| User registration & login | Secure account creation with email/password | 📋 Planned |
-| Candidate profile builder | Name, location, experience, education, skills | 📋 Planned |
-| CV upload | Upload existing CV (PDF/Word) for parsing and reformatting | 📋 Planned |
-| Auto-apply preference | Choose whether Job Match SA applies on your behalf | 📋 Planned |
-| Notification preferences | Choose email, SMS, job links, or all three | 📋 Planned |
+- **Job data ingestion** — nothing currently populates the `jobs` table from
+  real sources; it's read-only from `JobDAO`'s side. Pulling listings from a
+  public jobs API or a CSV source is the next priority, since it's the piece
+  that makes this a genuine data engineering project rather than just a
+  CRUD app with a matching algorithm.
+- Tailored CV per job (keyword-matched), and ATS scoring/feedback
+- Auto-apply engine with email fallback
+- Email / SMS notification delivery
+- Job market insights and skill-gap analytics across all candidates
+- Automated tests beyond manual verification
 
-### ATS CV Generator
+## Architecture (current)
 
-| Feature | Description | Status |
-|---|---|---|
-| Build from scratch | Generate a CV from profile details the user fills in | 📋 Planned |
-| Upload & reformat | Parse an existing CV and restructure it to be ATS-friendly | 📋 Planned |
-| Generic base CV | One strong, ATS-optimized CV for general applications | 📋 Planned |
-| Tailored CV per job | CV rewritten per application to match job-specific keywords and requirements | 📋 Planned |
-| PDF export | Download the generated or tailored CV as a PDF | 📋 Planned |
-| ATS score & feedback | Show how well the CV matches a job listing before applying | 📋 Planned |
+```
+JavaFX UI (JobMatchApp, ProfileFormController)
+        │
+        ▼
+Service layer (AuthService, ProfileService, MatchingService, CvGeneratorService)
+        │
+        ▼
+DAO layer (UserDAO, CandidateProfileDAO, JobDAO)
+        │
+        ▼
+PostgreSQL (shared connection via DatabaseConnection, credentials in .env)
+```
 
-### Job Matching & Applications
-
-| Feature | Description | Status |
-|---|---|---|
-| Job data ingestion | Collect listings from PNet, CareerJunction, Indeed SA, LinkedIn, and company career pages | 🚧 In progress |
-| Data cleaning & transformation | Normalize and deduplicate job data across sources | 🚧 In progress |
-| Job database | Structured storage of all processed listings | 🚧 In progress |
-| Skill matching engine | Match candidate skills to job requirements | 📋 Planned |
-| Auto-apply engine | Fill and submit job applications automatically; fall back to email if form submission is not possible | 📋 Planned |
-| Job link delivery | Send matched job links so candidates can apply themselves | 📋 Planned |
-
-### Notifications & Feedback
-
-| Feature | Description | Status |
-|---|---|---|
-| Email notifications | Match alerts, application confirmations, and status updates | 📋 Planned |
-| SMS notifications | Short match alerts and application confirmations | 📋 Planned |
-| Job link delivery | Curated job links sent to the candidate for manual application | 📋 Planned |
-| Application feedback | Status updates when employers respond | 📋 Planned |
-
-### Insights & Analytics
-
-| Feature | Description | Status |
-|---|---|---|
-| Skill gap analysis | Identify missing skills based on matched jobs | 📋 Planned |
-| Job market insights | Trending roles, in-demand skills, salary ranges | 📋 Planned |
-| Analytics & reporting | Personal application history and match statistics | 📋 Planned |
-
-## User Flow
-
-User registers & creates profile
-        ↓
-Sets preferences:
-  - Auto-apply ON/OFF
-  - Notifications: Email | SMS | Job Links | All
-        ↓
-CV Setup (choose one or both):
-  ┌─────────────────────┐     ┌──────────────────────────┐
-  │  Build from scratch │     │  Upload existing CV      │
-  │  using profile info │     │  → parsed & reformatted  │
-  └─────────────────────┘     └──────────────────────────┘
-        ↓
-ATS CV Generator produces:
-  - Generic base CV (PDF)
-  - Tailored CV per job (PDF) — keywords matched to each listing
-        ↓
-Job Match SA ingests listings from:
-  PNet · CareerJunction · Indeed SA · LinkedIn · Company Career Pages
-        ↓
-Data Cleaning & Standardization
-        ↓
-Skill Matching Engine compares profile to listings
-        ↓
-        ┌──────────────────────────┐
-        │     Auto-Apply ON        │
-        │  Tailored CV attached    │
-        │  Try form auto-submit    │
-        │  → Falls back to email   │
-        │    if form unavailable   │
-        └──────────────────────────┘
-                    +
-        ┌──────────────────────────┐
-        │   Notification Delivery  │
-        │  Email | SMS | Job Links │
-        │  (based on user choice)  │
-        └──────────────────────────┘
-        ↓
-Feedback & Skill Gap Insights delivered to user
-
-## Architecture
-
-Job Sources (PNet, CareerJunction, Indeed SA, LinkedIn, Career Pages)
-     ↓
-Data Ingestion Module
-     ↓
-Data Cleaning & Transformation Module
-     ↓
-Data Storage (PostgreSQL / MySQL)
-     ↓
-Analytics Engine
-     ↓
-Job Matching Engine
-     ↓
-ATS CV Generator (base CV + tailored CV per job)
-     ↓
-Auto-Apply Engine (form submit → email fallback)
-     ↓
-Notification Service (Email / SMS / Job Links)
-     ↓
-User Dashboard & Recommendations
-
-## Technologies
+## Tech Stack
 
 | Category | Tools |
 |---|---|
-| Language | Java |
-| IDE | IntelliJ IDEA |
-| Version Control | Git & GitHub |
-| Data Processing | CSV Processing, OOP |
-| Database | PostgreSQL / MySQL |
-| CV Parsing | Apache PDFBox / Apache POI |
-| PDF Generation | iText / Apache PDFBox |
-| Notifications | Email (SMTP / SendGrid) · SMS (Africa's Talking / Twilio) |
-| Web Automation | Selenium / Playwright (for auto-apply form submission) |
-
-## Project Status
-
-🚧 **In Development**
-
-### Progress Tracker
-
-- [x] Project planning
-- [x] Repository creation
-- [ ] Data za.co.jobmatchsa.model design
-- [ ] User account & profile module
-- [ ] Data ingestion module
-- [ ] Data cleaning module
-- [ ] Database integration
-- [ ] ATS CV generator (build from scratch)
-- [ ] ATS CV generator (upload & reformat)
-- [ ] Tailored CV engine (per job keyword matching)
-- [ ] Skill matching engine
-- [ ] Auto-apply engine
-- [ ] Notification service (email, SMS, job links)
-- [ ] Analytics engine
-- [ ] Skill gap analysis
-- [ ] Testing
-- [ ] Documentation
+| Language | Java 17 |
+| UI | JavaFX |
+| Database | PostgreSQL (JDBC) |
+| Password hashing | jBCrypt |
+| PDF generation | iText 7 |
+| Config | dotenv-java (`.env`, excluded from git) |
+| Build | Maven |
+| Version control | Git & GitHub |
 
 ## Getting Started
 
-> Setup instructions will be added as the project progresses.
-
 ### Prerequisites
 
-- Java (JDK 17+ recommended)
-- IntelliJ IDEA
-- PostgreSQL or MySQL
-- Git
+- Java JDK 17+
+- Maven
+- PostgreSQL
+- IntelliJ IDEA (or any IDE with JavaFX support)
 
-### Installation
+### Setup
 
-# Clone the repository
-git clone https://github.com/<your-username>/job-match-sa.git
+```bash
+git clone https://github.com/KeneilweMametse/JobMatchSA.git
+cd JobMatchSA
+```
 
-# Open in IntelliJ IDEA and configure your database connection
+Create a `.env` file in the project root with your database credentials:
+
+```
+DB_URL=jdbc:postgresql://localhost:5432/jobmatchsa
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+```
+
+Run the schema for `users`, `candidate_profiles`, `applications`, and `jobs`
+tables against your Postgres instance, then run `JobMatchApp` from your IDE
+(or via the `javafx-maven-plugin`: `mvn javafx:run`).
 
 ## Author
 
