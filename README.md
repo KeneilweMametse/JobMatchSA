@@ -2,10 +2,7 @@
 
 > A Java desktop app that matches candidates to jobs based on skills, and
 > generates a tailored CV — built as a Data Engineering elective project.
-
-## Demo Video
-
-📺 
+ 
 
 ## Overview
 
@@ -114,6 +111,4 @@ tables against your Postgres instance, then run `JobMatchApp` from your IDE
 
 **Keneilwe Mametse**
 
-## License
 
-This project is currently unlicensed. A license will be added before public release.
