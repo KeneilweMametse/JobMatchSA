@@ -54,16 +54,15 @@ public class CandidateProfileDAO {
      * Finds a candidate profile by the user's ID.
      * Returns the profile if it exists, or null if the user hasn't created one yet.
      */
-    public CandidateProfile findByUserId(int userId) {
-        String sql = "SELECT * FROM candidate_profiles WHERE user_id = ?";
+  public CandidateProfile findByUserId(int userId) {
+    String sql = "SELECT * FROM candidate_profiles WHERE user_id = ?";
 
-        Connection conn = DatabaseConnection.getConnection();
+    Connection conn = DatabaseConnection.getConnection();
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, userId);
 
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
+        try (ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 CandidateProfile profile = new CandidateProfile();
                 profile.setId(rs.getInt("id"));
@@ -79,13 +78,15 @@ public class CandidateProfileDAO {
                 profile.setPhoneNumber(rs.getString("phone_number"));
                 return profile;
             }
-
-        } catch (SQLException e) {
-            System.err.println("Error finding profile: " + e.getMessage());
         }
 
-        return null; // user has no profile yet
+    } catch (SQLException e) {
+        System.err.println("Error finding profile: " + e.getMessage());
     }
+
+    return null; // user has no profile yet
+}
+
 
     /**
      * Checks if a user already has a candidate profile.
