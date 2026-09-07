@@ -52,16 +52,15 @@ public class UserDAO {
      * Finds a user by their email address.
      * Returns the User object if found, or null if not found.
      */
-    public User findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+   public User findByEmail(String email) {
+    String sql = "SELECT * FROM users WHERE email = ?";
 
-        Connection conn = DatabaseConnection.getConnection();
+    Connection conn = DatabaseConnection.getConnection();
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, email);
 
-            stmt.setString(1, email);
-            ResultSet rs = stmt.executeQuery();
-
+        try (ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt("id"));
@@ -70,13 +69,16 @@ public class UserDAO {
                 user.setPassword(rs.getString("password"));
                 return user;
             }
-
-        } catch (SQLException e) {
-            System.err.println("Error finding user: " + e.getMessage());
         }
 
-        return null; // no user found with that email
+    } catch (SQLException e) {
+        System.err.println("Error finding user: " + e.getMessage());
     }
+
+    return null; // no user found with that email
+}
+
+    
 
     /**
      * Checks if an email is already registered.
