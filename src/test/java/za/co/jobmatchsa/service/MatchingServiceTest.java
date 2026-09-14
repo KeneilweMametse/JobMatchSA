@@ -1,73 +1,99 @@
 package za.co.jobmatchsa.service;
 
-import za.co.jobmatchsa.dao.JobDAO;
+import org.junit.jupiter.api.Test;
 import za.co.jobmatchsa.model.CandidateProfile;
 import za.co.jobmatchsa.model.Job;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MatchingService {
+class MatchingServiceTest {
 
-    private final JobDAO jobDAO = new JobDAO();
+    private final MatchingService matchingService = new MatchingService();
 
-    public static class JobMatch {
-        public final Job job;
-        public final int matchScore;
-        public final List<String> matchedSkills;
-        public final List<String> missingSkills;
-
-        public JobMatch(Job job, int matchScore, List<String> matchedSkills, List<String> missingSkills) {
-            this.job = job;
-            this.matchScore = matchScore;
-            this.matchedSkills = matchedSkills;
-            this.missingSkills = missingSkills;
-        }
+    private CandidateProfile profileWithSkills(String skills) {
+        return new CandidateProfile(1, "Cape Town", 2, "Degree", skills,
+                false, true, false, false, null);
     }
 
-    public List<JobMatch> findMatches(CandidateProfile profile) {
-        List<Job> allJobs = jobDAO.getAllJobs();
-        List<JobMatch> matches = new ArrayList<>();
-
-        for (Job job : allJobs) {
-            matches.add(matchAgainstJob(profile, job));
-        }
-
-        matches.sort((a, b) -> b.matchScore - a.matchScore);
-        return matches;
+    private Job jobRequiring(String requiredSkills) {
+        Job job = new Job();
+        job.setTitle("Data Engineer");
+        job.setCompany("Acme");
+        job.setLocation("Cape Town");
+        job.setRequiredSkills(requiredSkills);
+        return job;
     }
 
+    @Test
+    void fullMatchScoresOneHundred() {
+        CandidateProfile profile = profileWithSkills("Java, SQL, AWS");
+        Job job = jobRequiring("Java, SQL, AWS");
 
-    /**
-     * Scores a single candidate profile against a single job. Added as a
-     * standalone method so the matching logic can be unit tested directly
-     * with plain CandidateProfile/Job objects, without touching the database.
-     */
-    public JobMatch matchAgainstJob(CandidateProfile profile, Job job) {
-        List<String> candidateSkills = parseSkills(profile.getSkills());
-        List<String> requiredSkills = parseSkills(job.getRequiredSkills());
+        MatchingService.JobMatch result = matchingService.matchAgainstJob(profile, job);
 
-        List<String> matchedSkills = requiredSkills.stream()
-                .filter(candidateSkills::contains)
-                .collect(Collectors.toList());
-
-        List<String> missingSkills = requiredSkills.stream()
-                .filter(skill -> !candidateSkills.contains(skill))
-                .collect(Collectors.toList());
-
-        int score = requiredSkills.isEmpty() ? 0 :
-                (int) Math.round((matchedSkills.size() * 100.0) / requiredSkills.size());
-
-        return new JobMatch(job, score, matchedSkills, missingSkills);
+        assertEquals(100, result.matchScore);
+        assertEquals(3, result.matchedSkills.size());
+        assertTrue(result.missingSkills.isEmpty());
     }
 
-    private List<String> parseSkills(String skillsString) {
-        if (skillsString == null || skillsString.isBlank()) return new ArrayList<>();
-        return Arrays.stream(skillsString.split(","))
-                .map(String::trim)
-                .map(String::toLowerCase)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
+    @Test
+    void partialMatchCalculatesCorrectPercentage() {
+        CandidateProfile profile = profileWithSkills("Java, SQL");
+        Job job = jobRequiring("Java, SQL, AWS, Kafka"); // 2 of 4 required skills present
+
+        MatchingService.JobMatch result = matchingService.matchAgainstJob(profile, job);
+
+        assertEquals(50, result.matchScore);
+        assertEquals(2, result.matchedSkills.size());
+        assertEquals(2, result.missingSkills.size());
+        assertTrue(result.missingSkills.contains("aws"));
+        assertTrue(result.missingSkills.contains("kafka"));
+    }
+
+    @Test
+    void noOverlapScoresZero() {
+        CandidateProfile profile = profileWithSkills("Photoshop, Illustrator");
+        Job job = jobRequiring("Java, SQL");
+
+        MatchingService.JobMatch result = matchingService.matchAgainstJob(profile, job);
+
+        assertEquals(0, result.matchScore);
+        assertTrue(result.matchedSkills.isEmpty());
+        assertEquals(2, result.missingSkills.size());
+    }
+
+    @Test
+    void jobWithNoRequiredSkillsScoresZeroNotDivideByZeroError() {
+        CandidateProfile profile = profileWithSkills("Java, SQL");
+        Job job = jobRequiring("");
+
+        MatchingService.JobMatch result = matchingService.matchAgainstJob(profile, job);
+
+        assertEquals(0, result.matchScore);
+    }
+
+    @Test
+    void matchingIsCaseInsensitiveAndIgnoresWhitespace() {
+        CandidateProfile profile = profileWithSkills("  JAVA ,sql,  Aws  ");
+        Job job = jobRequiring("java, SQL, aws");
+
+        MatchingService.JobMatch result = matchingService.matchAgainstJob(profile, job);
+
+        assertEquals(100, result.matchScore);
+    }
+
+    @Test
+    void missingSkillsAreIdentifiedConsistentlyAcrossMultipleJobs() {
+        CandidateProfile profile = profileWithSkills("Java");
+        Job jobA = jobRequiring("Java, SQL");
+        Job jobB = jobRequiring("Java, SQL, AWS");
+
+        MatchingService.JobMatch matchA = matchingService.matchAgainstJob(profile, jobA);
+        MatchingService.JobMatch matchB = matchingService.matchAgainstJob(profile, jobB);
+
+        // sql is missing from both jobs, aws only from one
+        assertTrue(matchA.missingSkills.contains("sql"));
+        assertTrue(matchB.missingSkills.contains("sql"));
+        assertTrue(matchB.missingSkills.contains("aws"));
     }
 }
-
