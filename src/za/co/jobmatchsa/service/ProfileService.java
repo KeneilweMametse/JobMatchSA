@@ -27,20 +27,9 @@ public class ProfileService {
             return "A profile already exists for this user.";
         }
 
-        // Basic validation
-        if (location == null || location.isBlank()) {
-            return "Location cannot be empty.";
-        }
-        if (yearsExperience < 0) {
-            return "Years of experience cannot be negative.";
-        }
-        if (skills == null || skills.isBlank()) {
-            return "Please list at least one skill.";
-        }
-
-        // Phone number required if SMS notifications selected
-        if (notifySms && (phoneNumber == null || phoneNumber.isBlank())) {
-            return "Phone number is required for SMS notifications.";
+        String validationError = validateInput(location, yearsExperience, skills, notifySms, phoneNumber);
+        if (validationError != null) {
+            return validationError;
         }
 
         CandidateProfile profile = new CandidateProfile(
@@ -55,6 +44,27 @@ public class ProfileService {
         } else {
             return "Failed to create profile. Please try again.";
         }
+    }
+
+    /**
+     * Validates profile input with no database access, so it can be unit
+     * tested directly. Returns an error message, or null if input is valid.
+     */
+    public String validateInput(String location, int yearsExperience, String skills,
+                                 boolean notifySms, String phoneNumber) {
+        if (location == null || location.isBlank()) {
+            return "Location cannot be empty.";
+        }
+        if (yearsExperience < 0) {
+            return "Years of experience cannot be negative.";
+        }
+        if (skills == null || skills.isBlank()) {
+            return "Please list at least one skill.";
+        }
+        if (notifySms && (phoneNumber == null || phoneNumber.isBlank())) {
+            return "Phone number is required for SMS notifications.";
+        }
+        return null;
     }
 
     /**
