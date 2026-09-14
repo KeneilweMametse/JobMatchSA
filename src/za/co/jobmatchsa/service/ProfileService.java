@@ -21,16 +21,18 @@ public class ProfileService {
                                 boolean autoApply, boolean notifyEmail,
                                 boolean notifySms, boolean notifyJobLinks,
                                 String phoneNumber) {
-
-        // Prevent duplicate profiles
-        if (profileDAO.profileExists(userId)) {
-            return "A profile already exists for this user.";
-        }
-
+        
+    // Run cheap, pure validation before touching the database
         String validationError = validateInput(location, yearsExperience, skills, notifySms, phoneNumber);
         if (validationError != null) {
             return validationError;
         }
+
+    // Prevent duplicate profiles
+        if (profileDAO.profileExists(userId)) {
+            return "A profile already exists for this user.";
+        }
+
 
         CandidateProfile profile = new CandidateProfile(
                 userId, location, yearsExperience, educationLevel, skills,
