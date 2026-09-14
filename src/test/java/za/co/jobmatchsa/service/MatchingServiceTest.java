@@ -26,37 +26,22 @@ public class MatchingService {
     }
 
     public List<JobMatch> findMatches(CandidateProfile profile) {
-        List<String> candidateSkills = parseSkills(profile.getSkills());
         List<Job> allJobs = jobDAO.getAllJobs();
         List<JobMatch> matches = new ArrayList<>();
 
         for (Job job : allJobs) {
-            List<String> requiredSkills = parseSkills(job.getRequiredSkills());
-
-            List<String> matchedSkills = requiredSkills.stream()
-                    .filter(candidateSkills::contains)
-                    .collect(Collectors.toList());
-
-            List<String> missingSkills = requiredSkills.stream()
-                    .filter(skill -> !candidateSkills.contains(skill))
-                    .collect(Collectors.toList());
-
-            int score = requiredSkills.isEmpty() ? 0 :
-                    (int) Math.round((matchedSkills.size() * 100.0) / requiredSkills.size());
-
-            matches.add(new JobMatch(job, score, matchedSkills, missingSkills));
+            matches.add(matchAgainstJob(profile, job));
         }
 
         matches.sort((a, b) -> b.matchScore - a.matchScore);
         return matches;
     }
 
+
     /**
      * Scores a single candidate profile against a single job. Added as a
      * standalone method so the matching logic can be unit tested directly
      * with plain CandidateProfile/Job objects, without touching the database.
-     * (findMatches() still has its own inline copy of this logic for now —
-     * next commit switches it over to call this instead.)
      */
     public JobMatch matchAgainstJob(CandidateProfile profile, Job job) {
         List<String> candidateSkills = parseSkills(profile.getSkills());
