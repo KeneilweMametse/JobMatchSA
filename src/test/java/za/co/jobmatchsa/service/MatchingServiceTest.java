@@ -7,7 +7,7 @@ import za.co.jobmatchsa.model.Job;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MatchingServiceTests {
+public class MatchingServiceTest {
 
     private final JobDAO jobDAO = new JobDAO();
 
