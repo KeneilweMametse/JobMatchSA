@@ -46,11 +46,12 @@ public class JobMatchApp extends Application {
         TextField emailField = new TextField();
         emailField.setPromptText("Email");
         emailField.setMaxWidth(300);
+        emailField.setStyle("-fx-prompt-text-fill: #999; -fx-text-fill: #000; -fx-background-color: white;");
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
         passwordField.setMaxWidth(300);
-
+        passwordField.setStyle("-fx-prompt-text-fill: #999; -fx-text-fill: #000; -fx-background-color: white;");
         Button loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; " +
                 "-fx-font-weight: bold; -fx-min-width: 300;");
