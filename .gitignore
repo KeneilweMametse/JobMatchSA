@@ -6,4 +6,4 @@ target/
 
 # IntelliJ
 .idea/
-*.iml
+*.imlgenerated_cvs/
