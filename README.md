@@ -31,7 +31,7 @@ present vs. missing, then produces a CV from that same profile data.
 |---|---|
 | **Accounts** | Registration and login, passwords hashed with BCrypt (`AuthService`, `UserDAO`) |
 | **Candidate profiles** | Location, years of experience, education, skills, and notification preferences, with validation (e.g. phone number required if SMS is selected) (`ProfileService`, `CandidateProfileDAO`) |
-| **Skill matching** | Compares a candidate's skills against each job's required skills, returns a match score (`matched / required * 100`), plus matched and missing skill lists, sorted by best match (`MatchingService`) |
+| **Skill matching** | Compares a candidate's skills against each job's required skills, returns a match score (`matched / required * 100`), plus matched and missing skill lists, sorted by best match (`MatchingServiceTest`) |
 | **CV generation** | Builds a base CV as a PDF from the candidate's profile using iText (`CvGeneratorService`) |
 | **Desktop UI** | JavaFX screens for login, registration, and profile setup (`JobMatchApp`, `ProfileFormController`) |
 
