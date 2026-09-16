@@ -3,7 +3,6 @@
 > A Java desktop app that matches candidates to jobs based on skills, and
 > generates a tailored CV — built as a Data Engineering elective project.
  
-
 ## Overview
 
 **Job Match SA** is a JavaFX desktop application that lets a candidate create
@@ -31,9 +30,10 @@ present vs. missing, then produces a CV from that same profile data.
 |---|---|
 | **Accounts** | Registration and login, passwords hashed with BCrypt (`AuthService`, `UserDAO`) |
 | **Candidate profiles** | Location, years of experience, education, skills, and notification preferences, with validation (e.g. phone number required if SMS is selected) (`ProfileService`, `CandidateProfileDAO`) |
-| **Skill matching** | Compares a candidate's skills against each job's required skills, returns a match score (`matched / required * 100`), plus matched and missing skill lists, sorted by best match (`MatchingServiceTest`) |
+| **Skill matching** | Compares a candidate's skills against each job's required skills, returns a match score (`matched / required * 100`), plus matched and missing skill lists, sorted by best match (`MatchingService`) |
 | **CV generation** | Builds a base CV as a PDF from the candidate's profile using iText (`CvGeneratorService`) |
 | **Desktop UI** | JavaFX screens for login, registration, and profile setup (`JobMatchApp`, `ProfileFormController`) |
+| **Tests** | Unit tests covering the matching score logic and profile input validation (`MatchingServiceTest`, `ProfileServiceTest`) |
 
 ## Roadmap
 
@@ -49,22 +49,20 @@ built yet. Listed honestly so scope is clear:
 - Auto-apply engine with email fallback
 - Email / SMS notification delivery
 - Job market insights and skill-gap analytics across all candidates
-- Automated tests beyond manual verification
 
 ## Architecture (current)
 
-```
 JavaFX UI (JobMatchApp, ProfileFormController)
-        │
-        ▼
+│
+▼
 Service layer (AuthService, ProfileService, MatchingService, CvGeneratorService)
-        │
-        ▼
+│
+▼
 DAO layer (UserDAO, CandidateProfileDAO, JobDAO)
-        │
-        ▼
+│
+▼
 PostgreSQL (shared connection via DatabaseConnection, credentials in .env)
-```
+
 
 ## Tech Stack
 
@@ -76,6 +74,7 @@ PostgreSQL (shared connection via DatabaseConnection, credentials in .env)
 | Password hashing | jBCrypt |
 | PDF generation | iText 7 |
 | Config | dotenv-java (`.env`, excluded from git) |
+| Testing | JUnit 5 |
 | Build | Maven |
 | Version control | Git & GitHub |
 
@@ -97,18 +96,32 @@ cd JobMatchSA
 
 Create a `.env` file in the project root with your database credentials:
 
-```
 DB_URL=jdbc:postgresql://localhost:5432/jobmatchsa
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
+
+
+Create the database, then run the schema to set up the required tables
+(also seeds a few sample jobs for testing):
+
+```bash
+createdb jobmatchsa
+psql -d jobmatchsa -f sql/schema.sql
 ```
 
-Run the schema for `users`, `candidate_profiles`, `applications`, and `jobs`
-tables against your Postgres instance, then run `JobMatchApp` from your IDE
-(or via the `javafx-maven-plugin`: `mvn javafx:run`).
+Run the tests to confirm everything's working:
+
+```bash
+mvn test
+```
+
+Then run `JobMatchApp` from your IDE (or via the `javafx-maven-plugin`:
+`mvn javafx:run`).
 
 ## Author
 
 **Keneilwe Mametse**
+
+
 
 
