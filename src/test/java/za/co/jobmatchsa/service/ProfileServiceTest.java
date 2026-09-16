@@ -43,4 +43,28 @@ class ProfileServiceTest {
         String result = profileService.validateInput("Cape Town", 2, "  ", false, null);
         assertEquals("Please list at least one skill.", result);
     }
+
+    @Test
+    void smsWithoutPhoneNumberIsRejected() {
+        String result = profileService.validateInput("Cape Town", 2, "Java", true, null);
+        assertEquals("Phone number is required for SMS notifications.", result);
+    }
+
+    @Test
+    void smsWithBlankPhoneNumberIsRejected() {
+        String result = profileService.validateInput("Cape Town", 2, "Java", true, "  ");
+        assertEquals("Phone number is required for SMS notifications.", result);
+    }
+
+    @Test
+    void smsWithPhoneNumberPasses() {
+        String result = profileService.validateInput("Cape Town", 2, "Java", true, "0821234567");
+        assertNull(result);
+    }
+
+    @Test
+    void phoneNumberNotRequiredWhenSmsNotSelected() {
+        String result = profileService.validateInput("Cape Town", 2, "Java", false, null);
+        assertNull(result);
+    }
 }
