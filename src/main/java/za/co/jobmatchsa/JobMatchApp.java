@@ -316,7 +316,4 @@ public class JobMatchApp extends Application {
         DatabaseConnection.closeConnection();
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 }
